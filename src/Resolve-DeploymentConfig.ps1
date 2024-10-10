@@ -30,39 +30,44 @@ Write-Debug "Script root directory: $(Resolve-Path -Relative -Path $scriptRoot)"
 Import-Module $scriptRoot/support-functions.psm1 -Force
 
 #* Resolve files
-$paramFile = Get-Item -Path $ParameterFilePath
-$paramFileRelativePath = Resolve-Path -Relative -Path $paramFile.FullName
-$deploymentDirectory = $paramFile.Directory
+$parameterFile = Get-Item -Path $ParameterFilePath
+$parameterFileRelativePath = Resolve-Path -Relative -Path $parameterFile.FullName
+$environmentName = ($parameterFile.BaseName -split "\.")[0]
+$deploymentDirectory = $parameterFile.Directory
 $deploymentRelativePath = Resolve-Path -Relative -Path $deploymentDirectory.FullName
+$parameterFileName = $parameterFile.Name
 Write-Debug "[$($deploymentDirectory.Name)] Deployment directory path: $deploymentRelativePath"
-Write-Debug "[$($deploymentDirectory.Name)] Parameter file path: $paramFileRelativePath"
+Write-Debug "[$($deploymentDirectory.Name)] Parameter file path: $parameterFileRelativePath"
 
 #* Resolve deployment name
 $deploymentName = $deploymentDirectory.Name
 
 #* Create deployment objects
-Write-Debug "[$deploymentName][$($paramFile.BaseName)] Processing parameter file: $($paramFile.FullName)"
+Write-Debug "[$deploymentName][$environmentName] Processing parameter file: $parameterFileRelativePath"
 
 #* Get deploymentConfig
-$deploymentConfig = Get-DeploymentConfig `
-    -DeploymentDirectoryPath $deploymentRelativePath `
-    -ParameterFileName $paramFile.Name `
-    -DefaultDeploymentConfigPath $DefaultDeploymentConfigPath
+$param = @{
+    DeploymentDirectoryPath     = $deploymentRelativePath
+    ParameterFileName           = $parameterFileName
+    DefaultDeploymentConfigPath = $DefaultDeploymentConfigPath
+    Debug                       = ([bool]($PSBoundParameters.Debug))
+}
+$deploymentConfig = Get-DeploymentConfig @param
 
 #* Create deploymentObject
 Write-Debug "[$deploymentName] Creating deploymentObject"
 $deploymentObject = [pscustomobject]@{
     Deploy            = $true
     DeploymentName    = $deploymentConfig.name ?? "$deploymentName-$([Datetime]::Now.ToString("yyyyMMdd-HHmmss"))"
-    ParameterFile     = $paramFileRelativePath
-    TemplateReference = Resolve-ParameterFileTarget -ParameterFilePath $paramFileRelativePath
-    DeploymentScope   = Resolve-TemplateDeploymentScope -ParameterFilePath $paramFileRelativePath -DeploymentConfig $deploymentConfig
+    ParameterFile     = $parameterFileRelativePath
+    TemplateReference = Resolve-ParameterFileTarget -ParameterFilePath $parameterFileRelativePath
+    DeploymentScope   = Resolve-TemplateDeploymentScope -ParameterFilePath $parameterFileRelativePath -DeploymentConfig $deploymentConfig
     Location          = $deploymentConfig.location
     ResourceGroupName = $deploymentConfig.resourceGroupName
     ManagementGroupId = $deploymentConfig.managementGroupId
     AzureCliVersion   = $deploymentConfig.azureCliVersion
+    DeploymentConfig  = $deploymentConfig
 }
-Write-Debug "[$deploymentName] deploymentObject: $($deploymentObject | ConvertTo-Json -Depth 1)"
 
 #* Exclude disabled deployments
 Write-Debug "[$deploymentName] Checking if deployment is disabled in deploymentconfig.json"
@@ -74,6 +79,8 @@ if ($deploymentConfig.triggers -and $deploymentConfig.triggers.ContainsKey($GitH
     $deploymentObject.Deploy = $false
     Write-Debug "[$deploymentName] Deployment is disabled for the current trigger [$GitHubEventName] in deploymentconfig.json. Deployment is skipped."
 }
+
+Write-Debug "[$deploymentName] deploymentObject: $($deploymentObject | ConvertTo-Json -Depth 3)"
 
 #* Print deploymentObject to console
 if (!$Quiet.IsPresent) {

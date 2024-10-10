@@ -15,7 +15,8 @@ Describe "Resolve-DeploymentConfig.ps1" {
                 ParameterFilePath           = "$mockDirectory/deployments/workload-local/dev.bicepparam"
                 DefaultDeploymentConfigPath = "$mockDirectory/default.deploymentconfig.json"
                 GitHubEventName             = "workflow_dispatch"
-                Quiet                       = $true
+                Quiet                       = $false
+                Debug                       = $true
             }
 
             $script:res = ./src/Resolve-DeploymentConfig.ps1 @param
@@ -23,6 +24,10 @@ Describe "Resolve-DeploymentConfig.ps1" {
 
         It "Should have a TemplateReference pointing to a local template" {
             $res.TemplateReference | Should -Be 'main.bicep'
+        }
+
+        It "Should have a DeploymentConfig.disabled property set to 'true'" {
+            $res.Deploy | Should -BeFalse
         }
     }
 }
