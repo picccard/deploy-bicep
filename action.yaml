@@ -79,7 +79,7 @@ runs:
         azcliversion: ${{ steps.resolve-deploymentconfig.outputs.azure-cli-version }}
         inlineScript: |
           set -euo pipefail
-          if [ "${{ steps.resolve-deploymentconfig.outputs.scope }}" = "resourceGroup" ]; then
+          if [ "${{ steps.resolve-deploymentconfig.outputs.scope }}" = "resourceGroup" ] && [ "${{ inputs.stack == 'false' }}" ]; then
               deploymentOutput=$(az deployment group create \
                 --parameters '${{ steps.resolve-deploymentconfig.outputs.parameter-file }}' \
                 --name '${{ steps.resolve-deploymentconfig.outputs.name }}' \
@@ -87,7 +87,16 @@ runs:
                 --verbose \
                 ${{ (inputs.what-if == 'true') && '--what-if' || '' }} \
                 ${{ (runner.debug == '1') && '--debug' || '' }} 2>stderr.txt | tee deployment.md)
-          elif [ "${{ steps.resolve-deploymentconfig.outputs.scope }}" = "subscription" ]; then
+          elif [ "${{ steps.resolve-deploymentconfig.outputs.scope }}" = "resourceGroup" ] && [ "${{ inputs.stack == 'true' }}" ]; then
+              deploymentOutput=$(az stack group create \
+                --deny-settings-mode '${{ inputs.stack-deny-settings-mode }}' \
+                --action-on-unmanage '${{ inputs.stack-action-on-unmanage }}' \
+                --parameters '${{ steps.resolve-deploymentconfig.outputs.parameter-file }}' \
+                --name '${{ steps.resolve-deploymentconfig.outputs.name }}' \
+                --resource-group '${{ steps.resolve-deploymentconfig.outputs.resource-group }}' \
+                --verbose \
+                2>stderr.txt | tee deployment.md)
+          elif [ "${{ steps.resolve-deploymentconfig.outputs.scope }}" = "subscription" ] && [ "${{ inputs.stack == 'false' }}" ]; then
               deploymentOutput=$(az deployment sub create \
                 --parameters '${{ steps.resolve-deploymentconfig.outputs.parameter-file }}' \
                 --name '${{ steps.resolve-deploymentconfig.outputs.name }}' \
@@ -95,7 +104,16 @@ runs:
                 --verbose \
                 ${{ (inputs.what-if == 'true') && '--what-if' || '' }} \
                 ${{ (runner.debug == '1') && '--debug' || '' }} 2>stderr.txt | tee deployment.md)
-          elif [ "${{ steps.resolve-deploymentconfig.outputs.scope }}" = "managementGroup" ]; then
+          elif [ "${{ steps.resolve-deploymentconfig.outputs.scope }}" = "subscription" ] && [ "${{ inputs.stack == 'true' }}" ]; then
+              deploymentOutput=$(az stack sub create \
+                --deny-settings-mode '${{ inputs.stack-deny-settings-mode }}' \
+                --action-on-unmanage '${{ inputs.stack-action-on-unmanage }}' \
+                --parameters '${{ steps.resolve-deploymentconfig.outputs.parameter-file }}' \
+                --name '${{ steps.resolve-deploymentconfig.outputs.name }}' \
+                --location '${{ steps.resolve-deploymentconfig.outputs.location }}' \
+                --verbose \
+                2>stderr.txt | tee deployment.md)
+          elif [ "${{ steps.resolve-deploymentconfig.outputs.scope }}" = "managementGroup" ] && [ "${{ inputs.stack == 'false' }}" ]; then
               deploymentOutput=$(az deployment mg create \
                 --parameters '${{ steps.resolve-deploymentconfig.outputs.parameter-file }}' \
                 --name '${{ steps.resolve-deploymentconfig.outputs.name }}' \
@@ -104,7 +122,18 @@ runs:
                 --verbose \
                 ${{ (inputs.what-if == 'true') && '--what-if' || '' }} \
                 ${{ (runner.debug == '1') && '--debug' || '' }} 2>stderr.txt | tee deployment.md)
-          elif [ "${{ steps.resolve-deploymentconfig.outputs.scope }}" = "tenant" ]; then
+          elif [ "${{ steps.resolve-deploymentconfig.outputs.scope }}" = "managementGroup" ] && [ "${{ inputs.stack == 'true' }}" ]; then
+              deploymentOutput=$(az stack mg create \
+                --deny-settings-mode '${{ inputs.stack-deny-settings-mode }}' \
+                --action-on-unmanage '${{ inputs.stack-action-on-unmanage }}' \
+                --parameters '${{ steps.resolve-deploymentconfig.outputs.parameter-file }}' \
+                --name '${{ steps.resolve-deploymentconfig.outputs.name }}' \
+                --management-group-id '${{ steps.resolve-deploymentconfig.outputs.management-group-id }}' \
+                --location '${{ steps.resolve-deploymentconfig.outputs.location }}' \
+                --verbose \
+                ${{ (inputs.what-if == 'true') && '--what-if' || '' }} \
+                ${{ (runner.debug == '1') && '--debug' || '' }} 2>stderr.txt | tee deployment.md)
+          elif [ "${{ steps.resolve-deploymentconfig.outputs.scope }}" = "tenant" ] && [ "${{ inputs.stack == 'false' }}" ]; then
               deploymentOutput=$(az deployment tenant create \
                 --parameters '${{ steps.resolve-deploymentconfig.outputs.parameter-file }}' \
                 --name '${{ steps.resolve-deploymentconfig.outputs.name }}' \
