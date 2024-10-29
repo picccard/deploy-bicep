@@ -5,6 +5,28 @@ inputs:
   parameter-file-path:
     description: The path to the .bicepparam file.
     required: true
+  stack:
+    description: Deploy the template as a deployment stack.
+    required: false
+    default: 'false'
+  stack-deny-settings-mode:
+    description: Define which operations are denied on resources managed by the stack.
+    type: choice
+    required: false
+    default: 'none'
+    options:
+      - 'none'
+      - 'denyDelete'
+      - 'denyWriteAndDelete'
+  stack-action-on-unmanage:
+    description: Defines what happens to resources that are no longer managed after the stack is updated or deleted.
+    type: choice
+    required: false
+    default: 'detachAll'
+    options:
+      - 'detachAll'
+      - 'deleteResources'
+      - 'deleteAll'
   what-if:
     description: Setting this to true will run the deployment commands in what-if mode.
     required: false
