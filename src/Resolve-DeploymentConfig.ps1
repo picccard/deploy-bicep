@@ -57,16 +57,19 @@ $deploymentConfig = Get-DeploymentConfig @param
 #* Create deploymentObject
 Write-Debug "[$deploymentName] Creating deploymentObject"
 $deploymentObject = [pscustomobject]@{
-    Deploy            = $true
-    DeploymentName    = $deploymentConfig.name ?? "$deploymentName-$([Datetime]::Now.ToString("yyyyMMdd-HHmmss"))"
-    ParameterFile     = $parameterFileRelativePath
-    TemplateReference = Resolve-ParameterFileTarget -ParameterFilePath $parameterFileRelativePath
-    DeploymentScope   = Resolve-TemplateDeploymentScope -ParameterFilePath $parameterFileRelativePath -DeploymentConfig $deploymentConfig
-    Location          = $deploymentConfig.location
-    ResourceGroupName = $deploymentConfig.resourceGroupName
-    ManagementGroupId = $deploymentConfig.managementGroupId
-    AzureCliVersion   = $deploymentConfig.azureCliVersion
-    DeploymentConfig  = $deploymentConfig
+    Deploy                 = $true
+    DeploymentName         = $deploymentConfig.name ?? "$deploymentName-$([Datetime]::Now.ToString("yyyyMMdd-HHmmss"))"
+    ParameterFile          = $parameterFileRelativePath
+    TemplateReference      = Resolve-ParameterFileTarget -ParameterFilePath $parameterFileRelativePath
+    DeploymentScope        = Resolve-TemplateDeploymentScope -ParameterFilePath $parameterFileRelativePath -DeploymentConfig $deploymentConfig
+    Location               = $deploymentConfig.location
+    ResourceGroupName      = $deploymentConfig.resourceGroupName
+    ManagementGroupId      = $deploymentConfig.managementGroupId
+    AzureCliVersion        = $deploymentConfig.azureCliVersion
+    DeploymentStackEnabled = $deploymentConfig.deploymentStack.enabled #.ToString().ToLower()
+    StackDenySettingsMode  = $deploymentConfig.deploymentStack.'deny-settings-mode'
+    StackActionOnUnmanage  = $deploymentConfig.deploymentStack.'action-on-unmanage'
+    DeploymentConfig       = $deploymentConfig
 }
 
 #* Exclude disabled deployments
