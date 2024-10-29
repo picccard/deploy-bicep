@@ -141,6 +141,9 @@ runs:
                 --verbose \
                 ${{ (inputs.what-if == 'true') && '--what-if' || '' }} \
                 ${{ (runner.debug == '1') && '--debug' || '' }} 2>stderr.txt | tee deployment.md)
+          elif [ "${{ steps.resolve-deploymentconfig.outputs.scope }}" = "tenant" ] && [ "${{ inputs.stack == 'true' }}" ]; then
+              echo "::error::Stack deployment is not supported for tenant scope"
+              exit 1
           fi
 
           sed -i -e '1s/^/```diff\n/' -e '$a```' -e 's/~/!/g' -e 's/^[ \t]*//' deployment.md
