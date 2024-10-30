@@ -60,7 +60,6 @@ runs:
       with:
         azcliversion: ${{ steps.resolve-deploymentconfig.outputs.azure-cli-version }}
         inlineScript: |
-          set -euo pipefail
           if [ "${{ steps.resolve-deploymentconfig.outputs.scope }}" = "resourceGroup" ] && [ "${{ steps.resolve-deploymentconfig.outputs.deployment-stack-opt-in }}" != "true" ]; then
               deploymentOutput=$(az deployment group create \
                 --parameters '${{ steps.resolve-deploymentconfig.outputs.parameter-file }}' \
