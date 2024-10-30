@@ -49,6 +49,7 @@ runs:
         Write-Output "management-group-id=$($deploymentConfig.ManagementGroupId)" >> $env:GITHUB_OUTPUT
         Write-Output "azure-cli-version=$($deploymentConfig.AzureCliVersion)" >> $env:GITHUB_OUTPUT
         Write-Output "deployment-stack-opt-in=$($deploymentConfig.DeploymentStackOptIn)" >> $env:GITHUB_OUTPUT
+        Write-Output "deployment-stack-description=$($deploymentConfig.DeploymentStackDescription)" >> $env:GITHUB_OUTPUT
         Write-Output "deployment-stack-deny-settings-mode=$($deploymentConfig.DeploymentStackDenySettingsMode)" >> $env:GITHUB_OUTPUT
         Write-Output "deployment-stack-action-on-unmanage=$($deploymentConfig.DeploymentStackActionOnUnmanage)" >> $env:GITHUB_OUTPUT
 
@@ -74,6 +75,7 @@ runs:
                 --action-on-unmanage '${{ steps.resolve-deploymentconfig.outputs.deployment-stack-action-on-unmanage }}' \
                 --parameters '${{ steps.resolve-deploymentconfig.outputs.parameter-file }}' \
                 --name '${{ steps.resolve-deploymentconfig.outputs.name }}' \
+                --description '${{ steps.resolve-deploymentconfig.outputs.deployment-stack-description }}' \
                 --resource-group '${{ steps.resolve-deploymentconfig.outputs.resource-group }}' \
                 --verbose \
                 2>stderr.txt | tee deployment.md)
@@ -91,6 +93,7 @@ runs:
                 --action-on-unmanage '${{ steps.resolve-deploymentconfig.outputs.deployment-stack-action-on-unmanage }}' \
                 --parameters '${{ steps.resolve-deploymentconfig.outputs.parameter-file }}' \
                 --name '${{ steps.resolve-deploymentconfig.outputs.name }}' \
+                --description '${{ steps.resolve-deploymentconfig.outputs.deployment-stack-description }}' \
                 --location '${{ steps.resolve-deploymentconfig.outputs.location }}' \
                 --verbose \
                 2>stderr.txt | tee deployment.md)
@@ -109,6 +112,7 @@ runs:
                 --action-on-unmanage '${{ steps.resolve-deploymentconfig.outputs.deployment-stack-action-on-unmanage }}' \
                 --parameters '${{ steps.resolve-deploymentconfig.outputs.parameter-file }}' \
                 --name '${{ steps.resolve-deploymentconfig.outputs.name }}' \
+                --description '${{ steps.resolve-deploymentconfig.outputs.deployment-stack-description }}' \
                 --management-group-id '${{ steps.resolve-deploymentconfig.outputs.management-group-id }}' \
                 --location '${{ steps.resolve-deploymentconfig.outputs.location }}' \
                 --verbose \

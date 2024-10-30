@@ -67,6 +67,7 @@ $deploymentObject = [pscustomobject]@{
     ManagementGroupId               = $deploymentConfig.managementGroupId
     AzureCliVersion                 = $deploymentConfig.azureCliVersion
     DeploymentStackOptIn            = $deploymentConfig.deploymentStack ? "true" : "false"
+    DeploymentStackDescription      = $deploymentConfig.deploymentStack.description
     DeploymentStackDenySettingsMode = $deploymentConfig.deploymentStack.denySettingsMode
     DeploymentStackActionOnUnmanage = $deploymentConfig.deploymentStack.actionOnUnmanage
     DeploymentConfig                = $deploymentConfig
