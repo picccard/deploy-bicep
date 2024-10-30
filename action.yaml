@@ -48,9 +48,9 @@ runs:
         Write-Output "resource-group=$($deploymentConfig.ResourceGroupName)" >> $env:GITHUB_OUTPUT
         Write-Output "management-group-id=$($deploymentConfig.ManagementGroupId)" >> $env:GITHUB_OUTPUT
         Write-Output "azure-cli-version=$($deploymentConfig.AzureCliVersion)" >> $env:GITHUB_OUTPUT
-        Write-Output "deployment-stack-enabled=$($deploymentConfig.DeploymentStackEnabled)" >> $env:GITHUB_OUTPUT
-        Write-Output "deployment-stack-deny-settings-mode=$($deploymentConfig.StackDenySettingsMode)" >> $env:GITHUB_OUTPUT
-        Write-Output "deployment-stack-action-on-unmanage=$($deploymentConfig.StackActionOnUnmanage)" >> $env:GITHUB_OUTPUT
+        Write-Output "deployment-stack-opt-in=$($deploymentConfig.DeploymentStackOptIn)" >> $env:GITHUB_OUTPUT
+        Write-Output "deployment-stack-deny-settings-mode=$($deploymentConfig.DeploymentStackDenySettingsMode)" >> $env:GITHUB_OUTPUT
+        Write-Output "deployment-stack-action-on-unmanage=$($deploymentConfig.DeploymentStackActionOnUnmanage)" >> $env:GITHUB_OUTPUT
 
     - name: Bicep deployment
       id: bicep-deployment
@@ -60,7 +60,7 @@ runs:
         azcliversion: ${{ steps.resolve-deploymentconfig.outputs.azure-cli-version }}
         inlineScript: |
           set -euo pipefail
-          if [ "${{ steps.resolve-deploymentconfig.outputs.scope }}" = "resourceGroup" ] && [ "${{ steps.resolve-deploymentconfig.outputs.deployment-stack-enabled }}" != "true" ]; then
+          if [ "${{ steps.resolve-deploymentconfig.outputs.scope }}" = "resourceGroup" ] && [ "${{ steps.resolve-deploymentconfig.outputs.deployment-stack-opt-in }}" != "true" ]; then
               deploymentOutput=$(az deployment group create \
                 --parameters '${{ steps.resolve-deploymentconfig.outputs.parameter-file }}' \
                 --name '${{ steps.resolve-deploymentconfig.outputs.name }}' \
@@ -68,7 +68,7 @@ runs:
                 --verbose \
                 ${{ (inputs.what-if == 'true') && '--what-if' || '' }} \
                 ${{ (runner.debug == '1') && '--debug' || '' }} 2>stderr.txt | tee deployment.md)
-          elif [ "${{ steps.resolve-deploymentconfig.outputs.scope }}" = "resourceGroup" ] && [ "${{ steps.resolve-deploymentconfig.outputs.deployment-stack-enabled }}" == "true" ]; then
+          elif [ "${{ steps.resolve-deploymentconfig.outputs.scope }}" = "resourceGroup" ] && [ "${{ steps.resolve-deploymentconfig.outputs.deployment-stack-opt-in }}" == "true" ]; then
               deploymentOutput=$(az stack group create \
                 --deny-settings-mode '${{ steps.resolve-deploymentconfig.outputs.deployment-stack-deny-settings-mode }}' \
                 --action-on-unmanage '${{ steps.resolve-deploymentconfig.outputs.deployment-stack-action-on-unmanage }}' \
@@ -77,7 +77,7 @@ runs:
                 --resource-group '${{ steps.resolve-deploymentconfig.outputs.resource-group }}' \
                 --verbose \
                 2>stderr.txt | tee deployment.md)
-          elif [ "${{ steps.resolve-deploymentconfig.outputs.scope }}" = "subscription" ] && [ "${{ steps.resolve-deploymentconfig.outputs.deployment-stack-enabled }}" != "true" ]; then
+          elif [ "${{ steps.resolve-deploymentconfig.outputs.scope }}" = "subscription" ] && [ "${{ steps.resolve-deploymentconfig.outputs.deployment-stack-opt-in }}" != "true" ]; then
               deploymentOutput=$(az deployment sub create \
                 --parameters '${{ steps.resolve-deploymentconfig.outputs.parameter-file }}' \
                 --name '${{ steps.resolve-deploymentconfig.outputs.name }}' \
@@ -85,7 +85,7 @@ runs:
                 --verbose \
                 ${{ (inputs.what-if == 'true') && '--what-if' || '' }} \
                 ${{ (runner.debug == '1') && '--debug' || '' }} 2>stderr.txt | tee deployment.md)
-          elif [ "${{ steps.resolve-deploymentconfig.outputs.scope }}" = "subscription" ] && [ "${{ steps.resolve-deploymentconfig.outputs.deployment-stack-enabled }}" == "true" ]; then
+          elif [ "${{ steps.resolve-deploymentconfig.outputs.scope }}" = "subscription" ] && [ "${{ steps.resolve-deploymentconfig.outputs.deployment-stack-opt-in }}" == "true" ]; then
               deploymentOutput=$(az stack sub create \
                 --deny-settings-mode '${{ steps.resolve-deploymentconfig.outputs.deployment-stack-deny-settings-mode }}' \
                 --action-on-unmanage '${{ steps.resolve-deploymentconfig.outputs.deployment-stack-action-on-unmanage }}' \
@@ -94,7 +94,7 @@ runs:
                 --location '${{ steps.resolve-deploymentconfig.outputs.location }}' \
                 --verbose \
                 2>stderr.txt | tee deployment.md)
-          elif [ "${{ steps.resolve-deploymentconfig.outputs.scope }}" = "managementGroup" ] && [ "${{ steps.resolve-deploymentconfig.outputs.deployment-stack-enabled }}" != "true" ]; then
+          elif [ "${{ steps.resolve-deploymentconfig.outputs.scope }}" = "managementGroup" ] && [ "${{ steps.resolve-deploymentconfig.outputs.deployment-stack-opt-in }}" != "true" ]; then
               deploymentOutput=$(az deployment mg create \
                 --parameters '${{ steps.resolve-deploymentconfig.outputs.parameter-file }}' \
                 --name '${{ steps.resolve-deploymentconfig.outputs.name }}' \
@@ -103,7 +103,7 @@ runs:
                 --verbose \
                 ${{ (inputs.what-if == 'true') && '--what-if' || '' }} \
                 ${{ (runner.debug == '1') && '--debug' || '' }} 2>stderr.txt | tee deployment.md)
-          elif [ "${{ steps.resolve-deploymentconfig.outputs.scope }}" = "managementGroup" ] && [ "${{ steps.resolve-deploymentconfig.outputs.deployment-stack-enabled }}" == "true" ]; then
+          elif [ "${{ steps.resolve-deploymentconfig.outputs.scope }}" = "managementGroup" ] && [ "${{ steps.resolve-deploymentconfig.outputs.deployment-stack-opt-in }}" == "true" ]; then
               deploymentOutput=$(az stack mg create \
                 --deny-settings-mode '${{ steps.resolve-deploymentconfig.outputs.deployment-stack-deny-settings-mode }}' \
                 --action-on-unmanage '${{ steps.resolve-deploymentconfig.outputs.deployment-stack-action-on-unmanage }}' \
@@ -114,7 +114,7 @@ runs:
                 --verbose \
                 ${{ (inputs.what-if == 'true') && '--what-if' || '' }} \
                 ${{ (runner.debug == '1') && '--debug' || '' }} 2>stderr.txt | tee deployment.md)
-          elif [ "${{ steps.resolve-deploymentconfig.outputs.scope }}" = "tenant" ] && [ "${{ steps.resolve-deploymentconfig.outputs.deployment-stack-enabled }}" != "true" ]; then
+          elif [ "${{ steps.resolve-deploymentconfig.outputs.scope }}" = "tenant" ] && [ "${{ steps.resolve-deploymentconfig.outputs.deployment-stack-opt-in }}" != "true" ]; then
               deploymentOutput=$(az deployment tenant create \
                 --parameters '${{ steps.resolve-deploymentconfig.outputs.parameter-file }}' \
                 --name '${{ steps.resolve-deploymentconfig.outputs.name }}' \
@@ -122,7 +122,7 @@ runs:
                 --verbose \
                 ${{ (inputs.what-if == 'true') && '--what-if' || '' }} \
                 ${{ (runner.debug == '1') && '--debug' || '' }} 2>stderr.txt | tee deployment.md)
-          elif [ "${{ steps.resolve-deploymentconfig.outputs.scope }}" = "tenant" ] && [ "${{ steps.resolve-deploymentconfig.outputs.deployment-stack-enabled }}" == "true" ]; then
+          elif [ "${{ steps.resolve-deploymentconfig.outputs.scope }}" = "tenant" ] && [ "${{ steps.resolve-deploymentconfig.outputs.deployment-stack-opt-in }}" == "true" ]; then
               echo "::error::Stack deployment is not supported for tenant scope"
               exit 1
           fi
